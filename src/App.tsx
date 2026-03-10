@@ -4,6 +4,7 @@ import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from './firebase';
 import { PortfolioItem } from './types';
 import { AlertCircle } from 'lucide-react';
+import { sampleData } from './data/sampleData';
 
 // Components
 import Navbar from './components/Navbar';
@@ -50,11 +51,14 @@ function HomePage({ items }: { items: PortfolioItem[] }) {
 }
 
 export default function App() {
-  const [items, setItems] = useState<PortfolioItem[]>([]);
+  const [items, setItems] = useState<PortfolioItem[]>(isFirebaseConfigured ? [] : sampleData);
   const [loading, setLoading] = useState(isFirebaseConfigured);
 
   useEffect(() => {
-    if (!isFirebaseConfigured || !db) return;
+    if (!isFirebaseConfigured || !db) {
+      setLoading(false);
+      return;
+    }
 
     const q = query(collection(db, 'portfolio'), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -72,7 +76,7 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={!isFirebaseConfigured ? <MissingConfig /> : <HomePage items={items} />} />
+        <Route path="/" element={<HomePage items={items} />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/articles" element={<Article />} />
       </Routes>

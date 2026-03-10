@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { db } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { Send, MapPin, Mail, Phone, MessageCircle } from 'lucide-react';
@@ -14,6 +14,14 @@ interface ContactFormData {
 
 const ContactForm = () => {
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<ContactFormData>();
+  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  useEffect(() => {
+    if (statusMessage) {
+      const timer = setTimeout(() => setStatusMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [statusMessage]);
 
   const onSubmit = async (data: ContactFormData) => {
     try {
@@ -24,11 +32,11 @@ const ContactForm = () => {
         createdAt: Date.now()
       });
       
-      alert('Message sent successfully!');
+      setStatusMessage({ type: 'success', text: 'Message sent successfully!' });
       reset();
     } catch (error) {
       console.error('Error sending message:', error);
-      alert('Failed to send message. Please try again later.');
+      setStatusMessage({ type: 'error', text: 'Failed to send message. Please try again later.' });
     }
   };
 
@@ -40,7 +48,24 @@ const ContactForm = () => {
   ];
 
   return (
-    <section id="contact" className="py-24 bg-primary-dark px-6">
+    <section id="contact" className="py-24 bg-primary-dark px-6 relative">
+      {/* Status Message */}
+      <AnimatePresence>
+        {statusMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className={`fixed top-10 left-1/2 -translate-x-1/2 z-[100] px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border ${
+              statusMessage.type === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-500' : 'bg-red-500/10 border-red-500/20 text-red-500'
+            }`}
+          >
+            <div className={`w-2 h-2 rounded-full ${statusMessage.type === 'success' ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
+            <span className="font-bold text-sm">{statusMessage.text}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           {/* Contact Info */}

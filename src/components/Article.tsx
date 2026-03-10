@@ -7,6 +7,7 @@ import Markdown from 'react-markdown';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { Calendar, User, ArrowRight } from 'lucide-react';
+import { getGoogleDriveDirectLink } from '../utils';
 
 const Article = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -24,14 +25,6 @@ const Article = () => {
 
     return () => unsubscribe();
   }, []);
-
-  const getDriveImageUrl = (url: string) => {
-    if (url.includes('drive.google.com')) {
-      const id = url.match(/\/d\/(.+?)\//)?.[1] || url.match(/id=(.+?)(&|$)/)?.[1];
-      return id ? `https://lh3.googleusercontent.com/d/${id}` : url;
-    }
-    return url;
-  };
 
   return (
     <div className="bg-primary-dark min-h-screen font-sans">
@@ -73,7 +66,7 @@ const Article = () => {
               >
                 <div className="aspect-video overflow-hidden relative">
                   <img 
-                    src={getDriveImageUrl(post.image)} 
+                    src={getGoogleDriveDirectLink(post.image)} 
                     alt="Article Post" 
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     referrerPolicy="no-referrer"

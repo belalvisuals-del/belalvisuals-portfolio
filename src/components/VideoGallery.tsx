@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, X } from 'lucide-react';
 import { PortfolioItem } from '../types';
-import { getYouTubeEmbedLink } from '../utils';
+import { getYouTubeEmbedLink, getGoogleDriveDirectLink } from '../utils';
 
 interface VideoGalleryProps {
   items: PortfolioItem[];
@@ -37,7 +37,7 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({ items }) => {
             >
               <div className="aspect-video relative overflow-hidden">
                 <img
-                  src={item.thumbnail?.includes('drive.google.com') ? `https://lh3.googleusercontent.com/d/${item.thumbnail.match(/\/d\/(.+?)\//)?.[1]}` : (item.thumbnail || `https://img.youtube.com/vi/${item.url.split('v=')[1]?.split('&')[0]}/maxresdefault.jpg`)}
+                  src={getGoogleDriveDirectLink(item.thumbnail || `https://img.youtube.com/vi/${item.url.split('v=')[1]?.split('&')[0]}/maxresdefault.jpg`)}
                   alt=""
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   referrerPolicy="no-referrer"

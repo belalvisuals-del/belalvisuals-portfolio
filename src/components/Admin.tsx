@@ -50,7 +50,7 @@ const Admin = () => {
     } catch (error: any) {
       console.error('Login Error:', error);
       if (error.code === 'auth/popup-blocked') {
-        alert('আপনার ব্রাউজার পপআপ ব্লক করেছে। দয়া করে পপআপ এলাউ করুন অথবা লগইন বাটনে ক্লিক করুন।');
+        setStatusMessage({ type: 'error', text: 'আপনার ব্রাউজার পপআপ ব্লক করেছে। দয়া করে পপআপ এলাউ করুন।' });
       }
     }
   };
@@ -73,7 +73,7 @@ const Admin = () => {
         setUser(currentUser);
       } else if (currentUser) {
         signOut(auth);
-        alert('Access Denied: Only the administrator can access this panel.');
+        setStatusMessage({ type: 'error', text: 'Access Denied: Only the administrator can access this panel.' });
       } else {
         setUser(null);
         // Trigger auto login if not already attempted
@@ -126,7 +126,7 @@ const Admin = () => {
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!url || !db) {
-      alert('দয়া করে সব তথ্য পূরণ করুন।');
+      setStatusMessage({ type: 'error', text: 'দয়া করে সব তথ্য পূরণ করুন।' });
       return;
     }
 
@@ -141,7 +141,6 @@ const Admin = () => {
           updatedAt: Date.now()
         });
         setStatusMessage({ type: 'success', text: 'আইটেমটি সফলভাবে আপডেট করা হয়েছে!' });
-        alert('আইটেমটি সফলভাবে আপডেট করা হয়েছে!');
         setEditingItem(null);
       } else {
         await addDoc(collection(db, 'portfolio'), {
@@ -152,14 +151,13 @@ const Admin = () => {
           createdAt: Date.now()
         });
         setStatusMessage({ type: 'success', text: 'নতুন আইটেম সফলভাবে যোগ করা হয়েছে!' });
-        alert('নতুন আইটেম সফলভাবে যোগ করা হয়েছে!');
       }
       setUrl('');
       setThumbnail('');
       setShowAddModal(false);
     } catch (error) {
       console.error('Save Item Error:', error);
-      alert('আইটেম সেভ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+      setStatusMessage({ type: 'error', text: 'আইটেম সেভ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।' });
     } finally {
       setIsSubmitting(false);
     }
@@ -177,7 +175,7 @@ const Admin = () => {
   const handleAddArticle = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!articleImage || !articleContent || !db) {
-      alert('দয়া করে ইমেজ লিংক এবং কন্টেন্ট উভয়ই প্রদান করুন।');
+      setStatusMessage({ type: 'error', text: 'দয়া করে ইমেজ লিংক এবং কন্টেন্ট উভয়ই প্রদান করুন।' });
       return;
     }
 
@@ -190,7 +188,6 @@ const Admin = () => {
           updatedAt: Date.now()
         });
         setStatusMessage({ type: 'success', text: 'আর্টিকেলটি সফলভাবে আপডেট করা হয়েছে!' });
-        alert('আর্টিকেলটি সফলভাবে আপডেট করা হয়েছে!');
         setEditingArticle(null);
       } else {
         await addDoc(collection(db, 'blogs'), {
@@ -199,14 +196,13 @@ const Admin = () => {
           createdAt: Date.now()
         });
         setStatusMessage({ type: 'success', text: 'আর্টিকেলটি সফলভাবে পাবলিশ করা হয়েছে!' });
-        alert('আর্টিকেলটি সফলভাবে পাবলিশ করা হয়েছে!');
       }
       setArticleImage('');
       setArticleContent('');
       setShowArticleModal(false);
     } catch (error) {
       console.error('Save Article Error:', error);
-      alert('আর্টিকেল পাবলিশ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+      setStatusMessage({ type: 'error', text: 'আর্টিকেল পাবলিশ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।' });
     } finally {
       setIsSubmitting(false);
     }
@@ -230,10 +226,9 @@ const Admin = () => {
         cvLink
       }, { merge: true });
       setStatusMessage({ type: 'success', text: 'সেটিংস সফলভাবে আপডেট করা হয়েছে!' });
-      alert('সেটিংস সফলভাবে আপডেট করা হয়েছে!');
     } catch (error) {
       console.error('Update Settings Error:', error);
-      alert('সেটিংস আপডেট করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+      setStatusMessage({ type: 'error', text: 'সেটিংস আপডেট করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।' });
     } finally {
       setIsSubmitting(false);
     }

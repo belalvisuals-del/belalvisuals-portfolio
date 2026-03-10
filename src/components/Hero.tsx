@@ -5,10 +5,13 @@ import { db } from '../firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { SiteSettings } from '../types';
 
+import { getGoogleDriveDirectLink } from '../utils';
+
 const Hero = () => {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
 
   useEffect(() => {
+    if (!db) return;
     const unsub = onSnapshot(doc(db, 'settings', 'site'), (doc) => {
       if (doc.exists()) {
         setSettings(doc.data() as SiteSettings);
@@ -25,11 +28,7 @@ const Hero = () => {
   ];
 
   const getHeroImageUrl = () => {
-    if (settings?.heroImage?.includes('drive.google.com')) {
-      const id = settings.heroImage.match(/\/d\/(.+?)\//)?.[1];
-      return id ? `https://lh3.googleusercontent.com/d/${id}` : settings.heroImage;
-    }
-    return settings?.heroImage || "https://picsum.photos/seed/belal/400/400";
+    return getGoogleDriveDirectLink(settings?.heroImage || "https://picsum.photos/seed/belal/400/400");
   };
 
   return (
