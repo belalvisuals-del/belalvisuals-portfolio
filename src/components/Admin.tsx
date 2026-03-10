@@ -13,8 +13,7 @@ const Admin = () => {
   const [items, setItems] = useState<PortfolioItem[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [articles, setArticles] = useState<BlogPost[]>([]);
-  const [settings, setSettings] = useState<SiteSettings>({ heroImage: '', cvLink: '' });
-  const [activeTab, setActiveTab] = useState<'portfolio' | 'messages' | 'articles' | 'settings'>('portfolio');
+  const [activeTab, setActiveTab] = useState<'portfolio' | 'messages' | 'articles'>('portfolio');
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showArticleModal, setShowArticleModal] = useState(false);
@@ -32,10 +31,6 @@ const Admin = () => {
   // Article Form State
   const [articleImage, setArticleImage] = useState('');
   const [articleContent, setArticleContent] = useState('');
-
-  // Settings Form State
-  const [heroImage, setHeroImage] = useState('');
-  const [cvLink, setCvLink] = useState('');
 
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -103,21 +98,11 @@ const Admin = () => {
       setArticles(data);
     });
 
-    const unsubscribeSettings = onSnapshot(doc(db, 'settings', 'site'), (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.data() as SiteSettings;
-        setSettings(data);
-        setHeroImage(data.heroImage);
-        setCvLink(data.cvLink);
-      }
-    });
-
     return () => {
       unsubscribeAuth();
       unsubscribeItems();
       unsubscribeMsgs();
       unsubscribeArticles();
-      unsubscribeSettings();
     };
   }, []);
 
@@ -200,9 +185,12 @@ const Admin = () => {
       setArticleImage('');
       setArticleContent('');
       setShowArticleModal(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Save Article Error:', error);
-      setStatusMessage({ type: 'error', text: 'আর্টিকেল পাবলিশ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।' });
+      setStatusMessage({ 
+        type: 'error', 
+        text: `আর্টিকেল পাবলিশ করতে সমস্যা হয়েছে। এরর: ${error.message || 'Unknown error'}` 
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -213,25 +201,6 @@ const Admin = () => {
     setArticleImage(article.image);
     setArticleContent(article.content);
     setShowArticleModal(true);
-  };
-
-  const handleUpdateSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!db) return;
-
-    setIsSubmitting(true);
-    try {
-      await setDoc(doc(db, 'settings', 'site'), {
-        heroImage,
-        cvLink
-      }, { merge: true });
-      setStatusMessage({ type: 'success', text: 'সেটিংস সফলভাবে আপডেট করা হয়েছে!' });
-    } catch (error) {
-      console.error('Update Settings Error:', error);
-      setStatusMessage({ type: 'error', text: 'সেটিংস আপডেট করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।' });
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   const handleDeleteArticle = async (id: string) => {
@@ -435,15 +404,6 @@ const Admin = () => {
             </div>
             {activeTab === 'messages' && <motion.div layoutId="tab" className="absolute bottom-0 left-0 right-0 h-1 bg-primary-light rounded-full" />}
           </button>
-          <button
-            onClick={() => setActiveTab('settings')}
-            className={`pb-4 px-2 font-bold text-[10px] uppercase tracking-widest transition-all relative whitespace-nowrap ${activeTab === 'settings' ? 'text-primary-light' : 'text-gray-500 hover:text-white'}`}
-          >
-            <div className="flex items-center gap-2">
-              <Settings size={14} /> Site Settings
-            </div>
-            {activeTab === 'settings' && <motion.div layoutId="tab" className="absolute bottom-0 left-0 right-0 h-1 bg-primary-light rounded-full" />}
-          </button>
         </div>
 
         {activeTab === 'portfolio' && (
@@ -599,42 +559,6 @@ const Admin = () => {
                 No messages received yet.
               </div>
             )}
-          </div>
-        )}
-
-        {activeTab === 'settings' && (
-          <div className="max-w-2xl bg-primary-navy p-8 rounded-3xl border border-white/5 shadow-2xl">
-            <h2 className="text-xl font-bold mb-8 flex items-center gap-2">
-              <Settings size={20} className="text-primary-light" />
-              Site Configuration
-            </h2>
-            <form onSubmit={handleUpdateSettings} className="space-y-6">
-              <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Hero Image (Drive Link)</label>
-                <input
-                  value={heroImage}
-                  onChange={(e) => setHeroImage(e.target.value)}
-                  className="w-full px-5 py-4 bg-primary-dark/50 border border-white/10 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-primary-light/50 text-sm"
-                  placeholder="Paste Google Drive link for hero image"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">CV / Resume Link</label>
-                <input
-                  value={cvLink}
-                  onChange={(e) => setCvLink(e.target.value)}
-                  className="w-full px-5 py-4 bg-primary-dark/50 border border-white/10 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-primary-light/50 text-sm"
-                  placeholder="Paste CV link (Drive, Dropbox, etc.)"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={`w-full py-4 bg-primary-blue hover:bg-primary-light text-white font-bold rounded-2xl transition-all shadow-xl shadow-primary-blue/20 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {isSubmitting ? 'Updating...' : 'Update Settings'}
-              </button>
-            </form>
           </div>
         )}
       </div>

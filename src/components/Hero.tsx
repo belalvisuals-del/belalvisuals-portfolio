@@ -28,7 +28,10 @@ const Hero = () => {
   ];
 
   const getHeroImageUrl = () => {
-    return getGoogleDriveDirectLink(settings?.heroImage || "https://picsum.photos/seed/belal/400/400");
+    if (settings?.heroImage) {
+      return getGoogleDriveDirectLink(settings.heroImage);
+    }
+    return "/assets/hero.jpg";
   };
 
   return (
@@ -118,17 +121,16 @@ const Hero = () => {
               <MessageCircle size={16} className="md:w-[18px] md:h-[18px]" />
               WhatsApp
             </a>
-            {settings?.cvLink && (
-              <a
-                href={settings.cvLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm md:text-base font-semibold rounded-full border border-emerald-500/20 transition-all duration-300 backdrop-blur-sm"
-              >
-                <Download size={16} className="md:w-[18px] md:h-[18px]" />
-                Download CV
-              </a>
-            )}
+            
+            <a
+              href={settings?.cvLink || "/assets/cv.pdf"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm md:text-base font-semibold rounded-full border border-emerald-500/20 transition-all duration-300 backdrop-blur-sm"
+            >
+              <Download size={16} className="md:w-[18px] md:h-[18px]" />
+              Download CV
+            </a>
           </div>
         </motion.div>
       </div>
