@@ -18,7 +18,7 @@ const Navbar = () => {
     { name: 'Home', href: '/', isHash: true, hash: '#home' },
     { name: 'Designs', href: '/', isHash: true, hash: '#designs' },
     { name: 'Videos', href: '/', isHash: true, hash: '#videos' },
-    { name: 'Article', href: '/blog' },
+    { name: 'Articles', href: '/articles' },
     { name: 'Contact', href: '/', isHash: true, hash: '#contact' },
   ];
 

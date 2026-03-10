@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db, googleProvider, isFirebaseConfigured } from '../firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
-import { collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, updateDoc, setDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
 import { LogIn, LogOut, Plus, Trash2, Image as ImageIcon, Video, Link as LinkIcon, ShieldCheck, X, AlertTriangle, FileText, Settings, BookOpen, Edit } from 'lucide-react';
 import { PortfolioItem, Category, BlogPost, SiteSettings } from '../types';
+
+import { getGoogleDriveDirectLink } from '../utils';
 
 const Admin = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -35,7 +37,11 @@ const Admin = () => {
   const [heroImage, setHeroImage] = useState('');
   const [cvLink, setCvLink] = useState('');
 
+  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
   const ADMIN_EMAIL = 'belalvisuals@gmail.com';
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogin = async () => {
     if (!auth) return;
@@ -48,6 +54,13 @@ const Admin = () => {
       }
     }
   };
+
+  useEffect(() => {
+    if (statusMessage) {
+      const timer = setTimeout(() => setStatusMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [statusMessage]);
 
   useEffect(() => {
     if (!isFirebaseConfigured || !auth || !db) {
@@ -112,8 +125,12 @@ const Admin = () => {
 
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!url || !db) return;
+    if (!url || !db) {
+      alert('দয়া করে সব তথ্য পূরণ করুন।');
+      return;
+    }
 
+    setIsSubmitting(true);
     try {
       if (editingItem) {
         await updateDoc(doc(db, 'portfolio', editingItem.id), {
@@ -123,6 +140,8 @@ const Admin = () => {
           thumbnail: type === 'video' ? thumbnail : null,
           updatedAt: Date.now()
         });
+        setStatusMessage({ type: 'success', text: 'আইটেমটি সফলভাবে আপডেট করা হয়েছে!' });
+        alert('আইটেমটি সফলভাবে আপডেট করা হয়েছে!');
         setEditingItem(null);
       } else {
         await addDoc(collection(db, 'portfolio'), {
@@ -132,12 +151,17 @@ const Admin = () => {
           thumbnail: type === 'video' ? thumbnail : null,
           createdAt: Date.now()
         });
+        setStatusMessage({ type: 'success', text: 'নতুন আইটেম সফলভাবে যোগ করা হয়েছে!' });
+        alert('নতুন আইটেম সফলভাবে যোগ করা হয়েছে!');
       }
       setUrl('');
       setThumbnail('');
       setShowAddModal(false);
     } catch (error) {
       console.error('Save Item Error:', error);
+      alert('আইটেম সেভ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -152,8 +176,12 @@ const Admin = () => {
 
   const handleAddArticle = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!articleImage || !articleContent || !db) return;
+    if (!articleImage || !articleContent || !db) {
+      alert('দয়া করে ইমেজ লিংক এবং কন্টেন্ট উভয়ই প্রদান করুন।');
+      return;
+    }
 
+    setIsSubmitting(true);
     try {
       if (editingArticle) {
         await updateDoc(doc(db, 'blogs', editingArticle.id), {
@@ -161,6 +189,8 @@ const Admin = () => {
           content: articleContent,
           updatedAt: Date.now()
         });
+        setStatusMessage({ type: 'success', text: 'আর্টিকেলটি সফলভাবে আপডেট করা হয়েছে!' });
+        alert('আর্টিকেলটি সফলভাবে আপডেট করা হয়েছে!');
         setEditingArticle(null);
       } else {
         await addDoc(collection(db, 'blogs'), {
@@ -168,12 +198,17 @@ const Admin = () => {
           content: articleContent,
           createdAt: Date.now()
         });
+        setStatusMessage({ type: 'success', text: 'আর্টিকেলটি সফলভাবে পাবলিশ করা হয়েছে!' });
+        alert('আর্টিকেলটি সফলভাবে পাবলিশ করা হয়েছে!');
       }
       setArticleImage('');
       setArticleContent('');
       setShowArticleModal(false);
     } catch (error) {
       console.error('Save Article Error:', error);
+      alert('আর্টিকেল পাবলিশ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -188,15 +223,19 @@ const Admin = () => {
     e.preventDefault();
     if (!db) return;
 
+    setIsSubmitting(true);
     try {
-      const { setDoc } = await import('firebase/firestore');
       await setDoc(doc(db, 'settings', 'site'), {
         heroImage,
         cvLink
       }, { merge: true });
-      alert('Settings updated successfully!');
+      setStatusMessage({ type: 'success', text: 'সেটিংস সফলভাবে আপডেট করা হয়েছে!' });
+      alert('সেটিংস সফলভাবে আপডেট করা হয়েছে!');
     } catch (error) {
       console.error('Update Settings Error:', error);
+      alert('সেটিংস আপডেট করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -308,6 +347,23 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-primary-dark text-white p-4 md:p-10">
       <div className="max-w-7xl mx-auto">
+        {/* Status Message */}
+        <AnimatePresence>
+          {statusMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className={`fixed top-10 left-1/2 -translate-x-1/2 z-[100] px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border ${
+                statusMessage.type === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-500' : 'bg-red-500/10 border-red-500/20 text-red-500'
+              }`}
+            >
+              <div className={`w-2 h-2 rounded-full ${statusMessage.type === 'success' ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
+              <span className="font-bold text-sm">{statusMessage.text}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <header className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12">
           <div>
             <h1 className="text-4xl font-bold mb-2">Portfolio Manager</h1>
@@ -413,9 +469,9 @@ const Admin = () => {
                       <td className="px-6 py-4">
                         <div className="w-16 h-12 bg-primary-dark rounded-lg overflow-hidden border border-white/10">
                           {item.type === 'image' ? (
-                            <img src={item.url.includes('drive.google.com') ? `https://lh3.googleusercontent.com/d/${item.url.match(/\/d\/(.+?)\//)?.[1]}` : item.url} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            <img src={getGoogleDriveDirectLink(item.url)} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                           ) : (
-                            <img src={item.thumbnail?.includes('drive.google.com') ? `https://lh3.googleusercontent.com/d/${item.thumbnail.match(/\/d\/(.+?)\//)?.[1]}` : item.thumbnail} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            <img src={getGoogleDriveDirectLink(item.thumbnail || '')} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                           )}
                         </div>
                       </td>
@@ -479,7 +535,7 @@ const Admin = () => {
                       <tr key={article.id} className="hover:bg-white/5 transition-colors">
                         <td className="px-6 py-4">
                           <div className="w-16 h-12 bg-primary-dark rounded-lg overflow-hidden border border-white/10">
-                            <img src={article.image.includes('drive.google.com') ? `https://lh3.googleusercontent.com/d/${article.image.match(/\/d\/(.+?)\//)?.[1]}` : article.image} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            <img src={getGoogleDriveDirectLink(article.image)} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -578,9 +634,10 @@ const Admin = () => {
               </div>
               <button
                 type="submit"
-                className="w-full py-4 bg-primary-blue hover:bg-primary-light text-white font-bold rounded-2xl transition-all shadow-xl shadow-primary-blue/20"
+                disabled={isSubmitting}
+                className={`w-full py-4 bg-primary-blue hover:bg-primary-light text-white font-bold rounded-2xl transition-all shadow-xl shadow-primary-blue/20 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                Update Settings
+                {isSubmitting ? 'Updating...' : 'Update Settings'}
               </button>
             </form>
           </div>
@@ -692,9 +749,10 @@ const Admin = () => {
 
                 <button
                   type="submit"
-                  className="w-full py-4 bg-primary-blue hover:bg-primary-light text-white font-bold rounded-2xl transition-all shadow-xl shadow-primary-blue/20"
+                  disabled={isSubmitting}
+                  className={`w-full py-4 bg-primary-blue hover:bg-primary-light text-white font-bold rounded-2xl transition-all shadow-xl shadow-primary-blue/20 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  {editingItem ? 'Update Item' : 'Save Portfolio Item'}
+                  {isSubmitting ? 'Saving...' : (editingItem ? 'Update Item' : 'Save Portfolio Item')}
                 </button>
               </form>
             </motion.div>
@@ -758,9 +816,10 @@ const Admin = () => {
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-4 bg-primary-blue hover:bg-primary-light text-white font-bold rounded-2xl transition-all shadow-xl shadow-primary-blue/20"
+                  disabled={isSubmitting}
+                  className={`w-full py-4 bg-primary-blue hover:bg-primary-light text-white font-bold rounded-2xl transition-all shadow-xl shadow-primary-blue/20 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  {editingArticle ? 'Update Article' : 'Publish Article'}
+                  {isSubmitting ? 'Publishing...' : (editingArticle ? 'Update Article' : 'Publish Article')}
                 </button>
               </form>
             </motion.div>

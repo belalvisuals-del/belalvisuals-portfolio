@@ -13,7 +13,7 @@ import VideoGallery from './components/VideoGallery';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 import Admin from './components/Admin';
-import Article from './components/Blog';
+import Article from './components/Article';
 
 function MissingConfig() {
   return (
@@ -74,7 +74,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={!isFirebaseConfigured ? <MissingConfig /> : <HomePage items={items} />} />
         <Route path="/admin" element={<Admin />} />
-        <Route path="/blog" element={<Article />} />
+        <Route path="/articles" element={<Article />} />
       </Routes>
     </Router>
   );
