@@ -20,7 +20,7 @@ const Footer = () => {
               BELAL<span className="text-primary-light">VISUALS</span>
             </a>
             <p className="text-gray-500 mt-2 text-sm max-w-xs">
-              Professional Graphic Designer & UI/UX Expert. Specializing in Branding, Social Media Post Design, and Digital Marketing Materials.
+             Professional Graphic Designer & Video Editor. Crafting visually stunning designs and cinematic stories that elevate your brand's digital presence.
             </p>
           </div>
 
