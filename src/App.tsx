@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from './firebase';
 import { PortfolioItem } from './types';
 import { AlertCircle } from 'lucide-react';
@@ -11,10 +11,14 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import PortfolioGrid from './components/PortfolioGrid';
 import VideoGallery from './components/VideoGallery';
+import Experience from './components/Experience';
+import Clients from './components/Clients';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 import Admin from './components/Admin';
 import Article from './components/Article';
+import ArticleDetail from './components/ArticleDetail';
+import { Skill, ClientLogo, SiteSettings } from './types';
 
 function MissingConfig() {
   return (
@@ -37,13 +41,15 @@ function MissingConfig() {
   );
 }
 
-function HomePage({ items }: { items: PortfolioItem[] }) {
+function HomePage({ items, skills, clients, settings }: { items: PortfolioItem[], skills: Skill[], clients: ClientLogo[], settings: SiteSettings | null }) {
   return (
     <div className="bg-primary-dark min-h-screen selection:bg-primary-light selection:text-white">
       <Navbar />
       <Hero />
+      <Experience skills={skills} settings={settings} />
       <PortfolioGrid items={items} />
       <VideoGallery items={items} />
+      <Clients clients={clients} />
       <ContactForm />
       <Footer />
     </div>
@@ -52,6 +58,9 @@ function HomePage({ items }: { items: PortfolioItem[] }) {
 
 export default function App() {
   const [items, setItems] = useState<PortfolioItem[]>(isFirebaseConfigured ? [] : sampleData);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [clients, setClients] = useState<ClientLogo[]>([]);
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(isFirebaseConfigured);
 
   useEffect(() => {
@@ -60,25 +69,50 @@ export default function App() {
       return;
     }
 
+    // Fetch Portfolio
     const q = query(collection(db, 'portfolio'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribePortfolio = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PortfolioItem));
       setItems(data);
-      setLoading(false);
-    }, (error) => {
-      console.error("Firestore Error:", error);
+    });
+
+    // Fetch Skills
+    const qSkills = query(collection(db, 'skills'), orderBy('createdAt', 'asc'));
+    const unsubscribeSkills = onSnapshot(qSkills, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Skill));
+      setSkills(data);
+    });
+
+    // Fetch Clients
+    const qClients = query(collection(db, 'clients'), orderBy('createdAt', 'desc'));
+    const unsubscribeClients = onSnapshot(qClients, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ClientLogo));
+      setClients(data);
+    });
+
+    // Fetch Settings
+    const unsubscribeSettings = onSnapshot(doc(db, 'settings', 'site'), (doc) => {
+      if (doc.exists()) {
+        setSettings(doc.data() as SiteSettings);
+      }
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribePortfolio();
+      unsubscribeSkills();
+      unsubscribeClients();
+      unsubscribeSettings();
+    };
   }, []);
 
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<HomePage items={items} />} />
+        <Route path="/" element={<HomePage items={items} skills={skills} clients={clients} settings={settings} />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/articles" element={<Article />} />
+        <Route path="/articles/:id" element={<ArticleDetail />} />
       </Routes>
     </Router>
   );

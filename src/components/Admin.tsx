@@ -3,8 +3,8 @@ import { auth, db, googleProvider, isFirebaseConfigured } from '../firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
 import { collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, updateDoc, setDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
-import { LogIn, LogOut, Plus, Trash2, Image as ImageIcon, Video, Link as LinkIcon, ShieldCheck, X, AlertTriangle, FileText, Settings, BookOpen, Edit } from 'lucide-react';
-import { PortfolioItem, Category, BlogPost, SiteSettings } from '../types';
+import { LogIn, LogOut, Plus, Trash2, Image as ImageIcon, Video, Link as LinkIcon, ShieldCheck, X, AlertTriangle, FileText, Settings, BookOpen, Edit, Zap } from 'lucide-react';
+import { PortfolioItem, Category, BlogPost, SiteSettings, Skill, ClientLogo } from '../types';
 
 import { getGoogleDriveDirectLink } from '../utils';
 
@@ -13,10 +13,15 @@ const Admin = () => {
   const [items, setItems] = useState<PortfolioItem[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [articles, setArticles] = useState<BlogPost[]>([]);
-  const [activeTab, setActiveTab] = useState<'portfolio' | 'messages' | 'articles'>('portfolio');
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [clients, setClients] = useState<ClientLogo[]>([]);
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [activeTab, setActiveTab] = useState<'portfolio' | 'messages' | 'articles' | 'skills' | 'clients' | 'settings'>('portfolio');
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showArticleModal, setShowArticleModal] = useState(false);
+  const [showSkillModal, setShowSkillModal] = useState(false);
+  const [showClientModal, setShowClientModal] = useState(false);
   const [hasAttemptedAutoLogin, setHasAttemptedAutoLogin] = useState(false);
   
   // Portfolio Form State
@@ -27,10 +32,25 @@ const Admin = () => {
 
   const [editingItem, setEditingItem] = useState<PortfolioItem | null>(null);
   const [editingArticle, setEditingArticle] = useState<BlogPost | null>(null);
+  const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
+  const [editingClient, setEditingClient] = useState<ClientLogo | null>(null);
 
   // Article Form State
   const [articleImage, setArticleImage] = useState('');
   const [articleContent, setArticleContent] = useState('');
+
+  // Skill Form State
+  const [skillName, setSkillName] = useState('');
+  const [skillPercentage, setSkillPercentage] = useState(80);
+
+  // Client Form State
+  const [clientName, setClientName] = useState('');
+  const [clientLogo, setClientLogo] = useState('');
+
+  // Settings Form State
+  const [heroImage, setHeroImage] = useState('');
+  const [cvLink, setCvLink] = useState('');
+  const [successfulProjects, setSuccessfulProjects] = useState(0);
 
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -98,11 +118,36 @@ const Admin = () => {
       setArticles(data);
     });
 
+    const qSkills = query(collection(db, 'skills'), orderBy('createdAt', 'asc'));
+    const unsubscribeSkills = onSnapshot(qSkills, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Skill));
+      setSkills(data);
+    });
+
+    const qClients = query(collection(db, 'clients'), orderBy('createdAt', 'desc'));
+    const unsubscribeClients = onSnapshot(qClients, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ClientLogo));
+      setClients(data);
+    });
+
+    const unsubscribeSettings = onSnapshot(doc(db, 'settings', 'site'), (doc) => {
+      if (doc.exists()) {
+        const data = doc.data() as SiteSettings;
+        setSettings(data);
+        setHeroImage(data.heroImage || '');
+        setCvLink(data.cvLink || '');
+        setSuccessfulProjects(data.successfulProjects || 0);
+      }
+    });
+
     return () => {
       unsubscribeAuth();
       unsubscribeItems();
       unsubscribeMsgs();
       unsubscribeArticles();
+      unsubscribeSkills();
+      unsubscribeClients();
+      unsubscribeSettings();
     };
   }, []);
 
@@ -234,6 +279,96 @@ const Admin = () => {
         console.error('Delete Message Error:', error);
       }
     }
+  };
+
+  const handleAddSkill = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!skillName || !db) return;
+    setIsSubmitting(true);
+    try {
+      if (editingSkill) {
+        await updateDoc(doc(db, 'skills', editingSkill.id), {
+          name: skillName,
+          percentage: Number(skillPercentage),
+          updatedAt: Date.now()
+        });
+        setStatusMessage({ type: 'success', text: 'Skill updated!' });
+      } else {
+        await addDoc(collection(db, 'skills'), {
+          name: skillName,
+          percentage: Number(skillPercentage),
+          createdAt: Date.now()
+        });
+        setStatusMessage({ type: 'success', text: 'Skill added!' });
+      }
+      setSkillName('');
+      setSkillPercentage(80);
+      setShowSkillModal(false);
+      setEditingSkill(null);
+    } catch (error) {
+      setStatusMessage({ type: 'error', text: 'Error saving skill' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleAddClient = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!clientName || !clientLogo || !db) return;
+    setIsSubmitting(true);
+    try {
+      if (editingClient) {
+        await updateDoc(doc(db, 'clients', editingClient.id), {
+          name: clientName,
+          logoUrl: clientLogo,
+          updatedAt: Date.now()
+        });
+        setStatusMessage({ type: 'success', text: 'Client updated!' });
+      } else {
+        await addDoc(collection(db, 'clients'), {
+          name: clientName,
+          logoUrl: clientLogo,
+          createdAt: Date.now()
+        });
+        setStatusMessage({ type: 'success', text: 'Client added!' });
+      }
+      setClientName('');
+      setClientLogo('');
+      setShowClientModal(false);
+      setEditingClient(null);
+    } catch (error) {
+      setStatusMessage({ type: 'error', text: 'Error saving client' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdateSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!db) return;
+    setIsSubmitting(true);
+    try {
+      await setDoc(doc(db, 'settings', 'site'), {
+        heroImage,
+        cvLink,
+        successfulProjects: Number(successfulProjects)
+      }, { merge: true });
+      setStatusMessage({ type: 'success', text: 'Settings updated!' });
+    } catch (error) {
+      setStatusMessage({ type: 'error', text: 'Error updating settings' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteSkill = async (id: string) => {
+    if (!db || !window.confirm('Delete skill?')) return;
+    await deleteDoc(doc(db, 'skills', id));
+  };
+
+  const handleDeleteClient = async (id: string) => {
+    if (!db || !window.confirm('Delete client?')) return;
+    await deleteDoc(doc(db, 'clients', id));
   };
 
   if (!isFirebaseConfigured) {
@@ -404,6 +539,33 @@ const Admin = () => {
             </div>
             {activeTab === 'messages' && <motion.div layoutId="tab" className="absolute bottom-0 left-0 right-0 h-1 bg-primary-light rounded-full" />}
           </button>
+          <button
+            onClick={() => setActiveTab('skills')}
+            className={`pb-4 px-2 font-bold text-[10px] uppercase tracking-widest transition-all relative whitespace-nowrap ${activeTab === 'skills' ? 'text-primary-light' : 'text-gray-500 hover:text-white'}`}
+          >
+            <div className="flex items-center gap-2">
+              <Zap size={14} /> Skills
+            </div>
+            {activeTab === 'skills' && <motion.div layoutId="tab" className="absolute bottom-0 left-0 right-0 h-1 bg-primary-light rounded-full" />}
+          </button>
+          <button
+            onClick={() => setActiveTab('clients')}
+            className={`pb-4 px-2 font-bold text-[10px] uppercase tracking-widest transition-all relative whitespace-nowrap ${activeTab === 'clients' ? 'text-primary-light' : 'text-gray-500 hover:text-white'}`}
+          >
+            <div className="flex items-center gap-2">
+              <ShieldCheck size={14} /> Clients
+            </div>
+            {activeTab === 'clients' && <motion.div layoutId="tab" className="absolute bottom-0 left-0 right-0 h-1 bg-primary-light rounded-full" />}
+          </button>
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`pb-4 px-2 font-bold text-[10px] uppercase tracking-widest transition-all relative whitespace-nowrap ${activeTab === 'settings' ? 'text-primary-light' : 'text-gray-500 hover:text-white'}`}
+          >
+            <div className="flex items-center gap-2">
+              <Settings size={14} /> Settings
+            </div>
+            {activeTab === 'settings' && <motion.div layoutId="tab" className="absolute bottom-0 left-0 right-0 h-1 bg-primary-light rounded-full" />}
+          </button>
         </div>
 
         {activeTab === 'portfolio' && (
@@ -559,6 +721,176 @@ const Admin = () => {
                 No messages received yet.
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === 'skills' && (
+          <div className="space-y-6">
+            <div className="flex justify-end">
+              <button
+                onClick={() => {
+                  setEditingSkill(null);
+                  setSkillName('');
+                  setSkillPercentage(80);
+                  setShowSkillModal(true);
+                }}
+                className="flex items-center gap-2 px-6 py-3 bg-primary-blue hover:bg-primary-light text-white font-bold rounded-xl transition-all shadow-lg"
+              >
+                <Plus size={20} />
+                Add Skill
+              </button>
+            </div>
+            <div className="bg-primary-navy rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-white/5">
+                    <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Skill Name</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Percentage</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {skills.map((skill) => (
+                    <tr key={skill.id} className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 text-sm font-bold">{skill.name}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                            <div className="h-full bg-primary-light" style={{ width: `${skill.percentage}%` }} />
+                          </div>
+                          <span className="text-xs text-gray-400">{skill.percentage}%</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => {
+                              setEditingSkill(skill);
+                              setSkillName(skill.name);
+                              setSkillPercentage(skill.percentage);
+                              setShowSkillModal(true);
+                            }}
+                            className="p-2 text-gray-500 hover:text-primary-light transition-colors"
+                          >
+                            <Edit size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSkill(skill.id)}
+                            className="p-2 text-gray-500 hover:text-red-500 transition-colors"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'clients' && (
+          <div className="space-y-6">
+            <div className="flex justify-end">
+              <button
+                onClick={() => {
+                  setEditingClient(null);
+                  setClientName('');
+                  setClientLogo('');
+                  setShowClientModal(true);
+                }}
+                className="flex items-center gap-2 px-6 py-3 bg-primary-blue hover:bg-primary-light text-white font-bold rounded-xl transition-all shadow-lg"
+              >
+                <Plus size={20} />
+                Add Client
+              </button>
+            </div>
+            <div className="bg-primary-navy rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-white/5">
+                    <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Logo</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Client Name</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {clients.map((client) => (
+                    <tr key={client.id} className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4">
+                        <img src={getGoogleDriveDirectLink(client.logoUrl)} alt="" className="h-8 w-auto object-contain" referrerPolicy="no-referrer" />
+                      </td>
+                      <td className="px-6 py-4 text-sm font-bold">{client.name}</td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => {
+                              setEditingClient(client);
+                              setClientName(client.name);
+                              setClientLogo(client.logoUrl);
+                              setShowClientModal(true);
+                            }}
+                            className="p-2 text-gray-500 hover:text-primary-light transition-colors"
+                          >
+                            <Edit size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClient(client.id)}
+                            className="p-2 text-gray-500 hover:text-red-500 transition-colors"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div className="max-w-2xl mx-auto">
+            <form onSubmit={handleUpdateSettings} className="bg-primary-navy p-8 rounded-3xl border border-white/5 space-y-6 shadow-2xl">
+              <h2 className="text-xl font-bold mb-4">Site Settings</h2>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Hero Image (Drive Link)</label>
+                <input
+                  value={heroImage}
+                  onChange={(e) => setHeroImage(e.target.value)}
+                  className="w-full px-5 py-4 bg-primary-dark/50 border border-white/10 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-primary-light/50 text-sm"
+                  placeholder="Paste Google Drive link"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">CV / Resume Link</label>
+                <input
+                  value={cvLink}
+                  onChange={(e) => setCvLink(e.target.value)}
+                  className="w-full px-5 py-4 bg-primary-dark/50 border border-white/10 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-primary-light/50 text-sm"
+                  placeholder="Paste link to your CV"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Successful Projects Count</label>
+                <input
+                  type="number"
+                  value={successfulProjects}
+                  onChange={(e) => setSuccessfulProjects(Number(e.target.value))}
+                  className="w-full px-5 py-4 bg-primary-dark/50 border border-white/10 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-primary-light/50 text-sm"
+                  placeholder="e.g. 150"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-4 bg-primary-blue hover:bg-primary-light text-white font-bold rounded-2xl transition-all shadow-xl shadow-primary-blue/20"
+              >
+                {isSubmitting ? 'Updating...' : 'Save Settings'}
+              </button>
+            </form>
           </div>
         )}
       </div>
@@ -740,6 +1072,105 @@ const Admin = () => {
                 >
                   {isSubmitting ? 'Publishing...' : (editingArticle ? 'Update Article' : 'Publish Article')}
                 </button>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Add Skill Modal */}
+      <AnimatePresence>
+        {showSkillModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-primary-dark/90 backdrop-blur-xl"
+            onClick={() => setShowSkillModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="max-w-md w-full bg-primary-navy p-8 rounded-3xl border border-white/10 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="text-xl font-bold mb-6">{editingSkill ? 'Edit Skill' : 'Add Skill'}</h2>
+              <form onSubmit={handleAddSkill} className="space-y-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Skill Name</label>
+                  <input
+                    value={skillName}
+                    onChange={(e) => setSkillName(e.target.value)}
+                    className="w-full px-4 py-3 bg-primary-dark/50 border border-white/10 rounded-xl text-white focus:outline-none"
+                    placeholder="e.g. Adobe Photoshop"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Percentage ({skillPercentage}%)</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={skillPercentage}
+                    onChange={(e) => setSkillPercentage(Number(e.target.value))}
+                    className="w-full accent-primary-light"
+                  />
+                </div>
+                <div className="flex gap-3 mt-6">
+                  <button type="button" onClick={() => setShowSkillModal(false)} className="flex-1 py-3 bg-white/5 rounded-xl text-sm">Cancel</button>
+                  <button type="submit" className="flex-1 py-3 bg-primary-blue rounded-xl text-sm font-bold">Save</button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Add Client Modal */}
+      <AnimatePresence>
+        {showClientModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-primary-dark/90 backdrop-blur-xl"
+            onClick={() => setShowClientModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="max-w-md w-full bg-primary-navy p-8 rounded-3xl border border-white/10 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="text-xl font-bold mb-6">{editingClient ? 'Edit Client' : 'Add Client'}</h2>
+              <form onSubmit={handleAddClient} className="space-y-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Client Name</label>
+                  <input
+                    value={clientName}
+                    onChange={(e) => setClientName(e.target.value)}
+                    className="w-full px-4 py-3 bg-primary-dark/50 border border-white/10 rounded-xl text-white focus:outline-none"
+                    placeholder="e.g. Nike"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Logo URL (Drive Link)</label>
+                  <input
+                    value={clientLogo}
+                    onChange={(e) => setClientLogo(e.target.value)}
+                    className="w-full px-4 py-3 bg-primary-dark/50 border border-white/10 rounded-xl text-white focus:outline-none"
+                    placeholder="Paste Google Drive link"
+                    required
+                  />
+                </div>
+                <div className="flex gap-3 mt-6">
+                  <button type="button" onClick={() => setShowClientModal(false)} className="flex-1 py-3 bg-white/5 rounded-xl text-sm">Cancel</button>
+                  <button type="submit" className="flex-1 py-3 bg-primary-blue rounded-xl text-sm font-bold">Save</button>
+                </div>
               </form>
             </motion.div>
           </motion.div>

@@ -21,10 +21,34 @@ const Hero = () => {
   }, []);
 
   const floatingIcons = [
-    { Icon: Palette, color: 'text-pink-500', top: '-10%', left: '-10%', delay: 0 },
-    { Icon: VideoIcon, color: 'text-primary-blue', top: '20%', right: '-15%', delay: 0.5 },
-    { Icon: PenTool, color: 'text-emerald-500', bottom: '10%', left: '-15%', delay: 1 },
-    { Icon: Layers, color: 'text-orange-500', bottom: '-5%', right: '0%', delay: 1.5 },
+    { 
+      img: "https://upload.wikimedia.org/wikipedia/commons/a/af/Adobe_Photoshop_CC_icon.svg", 
+      color: 'border-blue-500/30', 
+      top: '-10%', 
+      left: '-10%', 
+      delay: 0 
+    },
+    { 
+      img: "https://upload.wikimedia.org/wikipedia/commons/f/fb/Adobe_Illustrator_CC_icon.svg", 
+      color: 'border-orange-500/30', 
+      top: '20%', 
+      right: '-15%', 
+      delay: 0.5 
+    },
+    { 
+      img: "https://upload.wikimedia.org/wikipedia/commons/c/cb/Adobe_After_Effects_CC_icon.svg", 
+      color: 'border-purple-500/30', 
+      bottom: '10%', 
+      left: '-15%', 
+      delay: 1 
+    },
+    { 
+      img: "https://upload.wikimedia.org/wikipedia/commons/4/40/Adobe_Premiere_Pro_CC_icon.svg", 
+      color: 'border-blue-700/30', 
+      bottom: '-5%', 
+      right: '0%', 
+      delay: 1.5 
+    },
   ];
 
   const getHeroImageUrl = () => {
@@ -70,10 +94,10 @@ const Hero = () => {
                     opacity: { duration: 1, delay: item.delay },
                     y: { duration: 3, repeat: Infinity, ease: "easeInOut", delay: item.delay }
                   }}
-                  className={`absolute z-20 p-1.5 md:p-3 bg-white/5 backdrop-blur-md rounded-lg md:rounded-xl border border-white/10 ${item.color}`}
+                  className={`absolute z-20 p-1.5 md:p-2 bg-white/5 backdrop-blur-md rounded-lg md:rounded-xl border ${item.color}`}
                   style={{ top: item.top, left: item.left, right: item.right, bottom: item.bottom }}
                 >
-                  <item.Icon size={14} className="md:w-6 md:h-6" />
+                  <img src={item.img} alt="" className="w-4 h-4 md:w-6 md:h-6 object-contain" />
                 </motion.div>
               ))}
 

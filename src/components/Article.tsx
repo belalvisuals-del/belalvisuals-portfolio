@@ -8,6 +8,7 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import { Calendar, User, ArrowRight } from 'lucide-react';
 import { getGoogleDriveDirectLink } from '../utils';
+import { Link } from 'react-router-dom';
 
 const Article = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -90,10 +91,13 @@ const Article = () => {
                     <Markdown>{post.content}</Markdown>
                   </div>
 
-                  <button className="flex items-center gap-2 text-primary-light font-bold text-sm uppercase tracking-widest group/btn">
+                  <Link 
+                    to={`/articles/${post.id}`}
+                    className="flex items-center gap-2 text-primary-light font-bold text-sm uppercase tracking-widest group/btn"
+                  >
                     Read More 
                     <ArrowRight size={16} className="transition-transform group-hover/btn:translate-x-1" />
-                  </button>
+                  </Link>
                 </div>
               </motion.article>
             ))}

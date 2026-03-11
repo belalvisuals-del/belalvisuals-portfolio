@@ -16,9 +16,25 @@ export interface BlogPost {
   createdAt: number;
 }
 
+export interface Skill {
+  id: string;
+  name: string;
+  percentage: number;
+  icon?: string; // Optional icon name or URL
+  createdAt: number;
+}
+
+export interface ClientLogo {
+  id: string;
+  name: string;
+  logoUrl: string;
+  createdAt: number;
+}
+
 export interface SiteSettings {
   heroImage: string;
   cvLink: string;
+  successfulProjects?: number;
 }
 
 export interface ContactMessage {
