@@ -48,8 +48,6 @@ const Admin = () => {
   const [clientLogo, setClientLogo] = useState('');
 
   // Settings Form State
-  const [heroImage, setHeroImage] = useState('');
-  const [cvLink, setCvLink] = useState('');
   const [successfulProjects, setSuccessfulProjects] = useState(0);
 
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -134,8 +132,6 @@ const Admin = () => {
       if (doc.exists()) {
         const data = doc.data() as SiteSettings;
         setSettings(data);
-        setHeroImage(data.heroImage || '');
-        setCvLink(data.cvLink || '');
         setSuccessfulProjects(data.successfulProjects || 0);
       }
     });
@@ -349,8 +345,6 @@ const Admin = () => {
     setIsSubmitting(true);
     try {
       await setDoc(doc(db, 'settings', 'site'), {
-        heroImage,
-        cvLink,
         successfulProjects: Number(successfulProjects)
       }, { merge: true });
       setStatusMessage({ type: 'success', text: 'Settings updated!' });
@@ -855,24 +849,6 @@ const Admin = () => {
           <div className="max-w-2xl mx-auto">
             <form onSubmit={handleUpdateSettings} className="bg-primary-navy p-8 rounded-3xl border border-white/5 space-y-6 shadow-2xl">
               <h2 className="text-xl font-bold mb-4">Site Settings</h2>
-              <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Hero Image (Drive Link)</label>
-                <input
-                  value={heroImage}
-                  onChange={(e) => setHeroImage(e.target.value)}
-                  className="w-full px-5 py-4 bg-primary-dark/50 border border-white/10 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-primary-light/50 text-sm"
-                  placeholder="Paste Google Drive link"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">CV / Resume Link</label>
-                <input
-                  value={cvLink}
-                  onChange={(e) => setCvLink(e.target.value)}
-                  className="w-full px-5 py-4 bg-primary-dark/50 border border-white/10 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-primary-light/50 text-sm"
-                  placeholder="Paste link to your CV"
-                />
-              </div>
               <div>
                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Successful Projects Count</label>
                 <input
