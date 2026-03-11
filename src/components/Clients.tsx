@@ -22,7 +22,7 @@ const Clients = ({ clients }: ClientsProps) => {
           viewport={{ once: true }}
           className="text-2xl md:text-4xl font-bold text-white tracking-tight"
         >
-          Trusted By <span className="text-primary-light">Global Clients</span>
+          My <span className="text-primary-light">Clients</span>
         </motion.h2>
       </div>
 
