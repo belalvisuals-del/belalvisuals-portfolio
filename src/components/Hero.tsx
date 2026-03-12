@@ -111,7 +111,7 @@ const Hero = () => {
             </div>
           </div>
 
-          <h1 className="text-3xl md:text-8xl font-bold text-white mb-4 tracking-tight leading-tight md:leading-none flex items-center justify-center gap-3">
+          <h1 className="text-4xl md:text-6xl lg:text-8xl font-bold text-white mb-4 tracking-tight leading-tight lg:leading-none flex items-center justify-center gap-3">
             <div className="flex items-center justify-center w-4 h-4 md:w-8 md:h-8 bg-emerald-500/20 rounded-full border border-emerald-500/30 backdrop-blur-sm">
               <div className="w-1.5 h-1.5 md:w-3 md:h-3 bg-emerald-500 rounded-full relative">
                 <div className="absolute inset-0 bg-emerald-500 rounded-full animate-ping opacity-75"></div>

@@ -16,28 +16,28 @@ const FloatingContact = () => {
       <motion.div 
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="fixed bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-[90] w-[90%] md:w-max max-w-[400px] md:max-w-none shadow-black/50"
+        className="fixed bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-[90] w-max max-w-[90%] shadow-black/50"
       >
         <motion.div 
           animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
           transition={{ duration: 10, ease: "linear", repeat: Infinity }}
-          className="bg-[linear-gradient(45deg,#032259,#0451A7,#3A78C3,#032259)] bg-[length:400%_400%] border border-white/20 p-2 md:p-3 rounded-full flex items-center justify-between gap-4 md:gap-12 shadow-2xl overflow-hidden relative group"
+          className="bg-[linear-gradient(45deg,rgba(3,34,89,0.7),rgba(4,81,167,0.7),rgba(58,120,195,0.7),rgba(3,34,89,0.7))] bg-[length:400%_400%] backdrop-blur-xl border border-white/20 p-1.5 md:p-2 rounded-full flex items-center justify-between gap-3 md:gap-6 shadow-2xl overflow-hidden relative group"
         >
           
           {/* Inner subtle glow */}
-          <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full pointer-events-none" />
+          <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full pointer-events-none" />
           
-          <span className="text-white font-medium text-sm md:text-base pl-4 md:pl-6 whitespace-nowrap z-10">
+          <span className="text-white/90 font-medium text-xs md:text-sm pl-4 md:pl-5 whitespace-nowrap z-10">
             Let's Create Magic!
           </span>
           <a 
             href="https://wa.me/8801628786232" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="bg-white hover:bg-white/90 text-primary-dark flex items-center gap-2 px-5 py-2.5 md:px-8 md:py-3 rounded-full font-extrabold transition-all text-sm md:text-base hover:scale-[1.02] shadow-[0_0_20px_rgba(255,255,255,0.3)] z-10 whitespace-nowrap"
+            className="bg-white hover:bg-white/90 text-primary-dark flex items-center gap-1.5 px-4 py-2 md:px-5 md:py-2.5 rounded-full font-bold transition-all text-xs md:text-sm hover:scale-[1.02] shadow-[0_0_15px_rgba(255,255,255,0.2)] z-10 whitespace-nowrap"
           >
-            <span className="w-6 h-6 flex items-center justify-center bg-primary-blue rounded-full">
-              <ArrowUpRight size={14} className="text-white" />
+            <span className="w-5 h-5 flex items-center justify-center bg-primary-blue rounded-full">
+              <ArrowUpRight size={12} className="text-white" />
             </span>
             Hire Me
           </a>

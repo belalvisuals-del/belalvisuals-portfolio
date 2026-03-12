@@ -14,7 +14,7 @@ const Clients = ({ clients }: ClientsProps) => {
   const displayClients = [...clients, ...clients, ...clients];
 
   return (
-    <section id="clients" className="py-24 bg-primary-dark overflow-hidden border-t border-white/5">
+    <section id="clients" className="py-16 lg:py-24 bg-primary-dark overflow-hidden border-t border-white/5">
       <div className="max-w-7xl mx-auto px-6 mb-12 text-center">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}

@@ -48,7 +48,7 @@ const ContactForm = () => {
   ];
 
   return (
-    <section id="contact" className="py-24 bg-primary-dark px-6 relative">
+    <section id="contact" className="pt-12 pb-24 bg-primary-dark px-6 relative">
       {/* Status Message */}
       <AnimatePresence>
         {statusMessage && (
