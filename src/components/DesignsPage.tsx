@@ -29,7 +29,7 @@ const DesignsPage: React.FC<DesignsPageProps> = ({ items }) => {
           className="inline-flex items-center gap-2 px-6 py-3 bg-primary-blue/90 hover:bg-[#1769ff] text-white font-medium text-sm rounded-full transition-all duration-300 shadow-lg shadow-primary-blue/30 hover:scale-[1.02] border border-white/10"
         >
           <ThumbsUp size={16} className="text-white" />
-          Appreciate My Work
+          Appreciate My Work on Behance
         </motion.a>
       </div>
 
