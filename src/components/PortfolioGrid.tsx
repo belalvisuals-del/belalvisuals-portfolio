@@ -4,20 +4,35 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Maximize2, X } from 'lucide-react';
 import { PortfolioItem, Category } from '../types';
 import { getGoogleDriveDirectLink } from '../utils';
+import { Link } from 'react-router-dom';
 
 interface PortfolioGridProps {
   items: PortfolioItem[];
+  limit?: number;
 }
 
-const PortfolioGrid: React.FC<PortfolioGridProps> = ({ items }) => {
+const PortfolioGrid: React.FC<PortfolioGridProps> = ({ items, limit }) => {
   const [filter, setFilter] = useState<Category | 'All'>('All');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const categories: (Category | 'All')[] = ['All', 'Post Design', 'Facebook Cover', 'Print Design', 'Ads Design', 'Other'];
 
-  const filteredItems = items.filter(item => 
-    item.type === 'image' && (filter === 'All' || item.category === filter)
-  );
+  const displayedItems = React.useMemo(() => {
+    const filtered = items.filter(item => 
+      item.type === 'image' && (filter === 'All' || item.category === filter)
+    );
+    
+    if (limit && filter === 'All') {
+      // Shuffle only on 'All' to ensure a cool mix on homepage
+      const shuffled = [...filtered].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, limit);
+    } else if (limit) {
+      return filtered.slice(0, limit);
+    }
+    return filtered;
+  }, [items, filter, limit]);
+
+  const totalFilteredCount = items.filter(item => item.type === 'image' && (filter === 'All' || item.category === filter)).length;
 
   const breakpointColumnsObj = {
     default: 4,
@@ -56,7 +71,7 @@ const PortfolioGrid: React.FC<PortfolioGridProps> = ({ items }) => {
           className="masonry-grid"
           columnClassName="masonry-grid_column"
         >
-          {filteredItems.map((item) => (
+          {displayedItems.map((item) => (
             <motion.div
               layout
               key={item.id}
@@ -75,7 +90,7 @@ const PortfolioGrid: React.FC<PortfolioGridProps> = ({ items }) => {
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-                <p className="text-xs font-semibold text-primary-light uppercase tracking-widest mb-1">{item.category}</p>
+                <p className="text-xs font-semibold text-white uppercase tracking-widest mb-1">{item.category}</p>
                 <div className="absolute top-4 right-4 p-2 bg-white/10 backdrop-blur-md rounded-full text-white opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                   <Maximize2 size={18} />
                 </div>
@@ -84,9 +99,21 @@ const PortfolioGrid: React.FC<PortfolioGridProps> = ({ items }) => {
           ))}
         </Masonry>
 
-        {filteredItems.length === 0 && (
+        {displayedItems.length === 0 && (
           <div className="text-center py-20">
             <p className="text-gray-500 italic">No designs found in this category.</p>
+          </div>
+        )}
+
+        {limit && totalFilteredCount > limit && (
+          <div className="mt-16 text-center">
+            <Link 
+              to="/designs"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-primary-blue hover:bg-primary-light text-white font-bold rounded-full transition-all duration-300 shadow-lg shadow-primary-blue/20 hover:scale-[1.02]"
+            >
+              See More Designs
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide-arrow-right"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </Link>
           </div>
         )}
       </div>

@@ -16,7 +16,7 @@ const Clients = ({ clients }: ClientsProps) => {
   return (
     <section id="clients" className="py-24 bg-primary-dark overflow-hidden border-t border-white/5">
       <div className="max-w-7xl mx-auto px-6 mb-12 text-center">
-        <motion.h2 
+        <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}

@@ -42,6 +42,7 @@ const Admin = () => {
   // Skill Form State
   const [skillName, setSkillName] = useState('');
   const [skillPercentage, setSkillPercentage] = useState(80);
+  const [skillIcon, setSkillIcon] = useState('');
 
   // Client Form State
   const [clientName, setClientName] = useState('');
@@ -49,6 +50,8 @@ const Admin = () => {
 
   // Settings Form State
   const [successfulProjects, setSuccessfulProjects] = useState(0);
+  const [heroImage, setHeroImage] = useState('');
+  const [cvLink, setCvLink] = useState('');
 
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -133,6 +136,8 @@ const Admin = () => {
         const data = doc.data() as SiteSettings;
         setSettings(data);
         setSuccessfulProjects(data.successfulProjects || 0);
+        setHeroImage(data.heroImage || '');
+        setCvLink(data.cvLink || '');
       }
     });
 
@@ -286,6 +291,7 @@ const Admin = () => {
         await updateDoc(doc(db, 'skills', editingSkill.id), {
           name: skillName,
           percentage: Number(skillPercentage),
+          icon: skillIcon,
           updatedAt: Date.now()
         });
         setStatusMessage({ type: 'success', text: 'Skill updated!' });
@@ -293,12 +299,14 @@ const Admin = () => {
         await addDoc(collection(db, 'skills'), {
           name: skillName,
           percentage: Number(skillPercentage),
+          icon: skillIcon,
           createdAt: Date.now()
         });
         setStatusMessage({ type: 'success', text: 'Skill added!' });
       }
       setSkillName('');
       setSkillPercentage(80);
+      setSkillIcon('');
       setShowSkillModal(false);
       setEditingSkill(null);
     } catch (error) {
@@ -345,7 +353,9 @@ const Admin = () => {
     setIsSubmitting(true);
     try {
       await setDoc(doc(db, 'settings', 'site'), {
-        successfulProjects: Number(successfulProjects)
+        successfulProjects: Number(successfulProjects),
+        heroImage,
+        cvLink
       }, { merge: true });
       setStatusMessage({ type: 'success', text: 'Settings updated!' });
     } catch (error) {
@@ -726,6 +736,7 @@ const Admin = () => {
                   setEditingSkill(null);
                   setSkillName('');
                   setSkillPercentage(80);
+                  setSkillIcon('');
                   setShowSkillModal(true);
                 }}
                 className="flex items-center gap-2 px-6 py-3 bg-primary-blue hover:bg-primary-light text-white font-bold rounded-xl transition-all shadow-lg"
@@ -762,6 +773,7 @@ const Admin = () => {
                               setEditingSkill(skill);
                               setSkillName(skill.name);
                               setSkillPercentage(skill.percentage);
+                              setSkillIcon(skill.icon || '');
                               setShowSkillModal(true);
                             }}
                             className="p-2 text-gray-500 hover:text-primary-light transition-colors"
@@ -849,6 +861,35 @@ const Admin = () => {
           <div className="max-w-2xl mx-auto">
             <form onSubmit={handleUpdateSettings} className="bg-primary-navy p-8 rounded-3xl border border-white/5 space-y-6 shadow-2xl">
               <h2 className="text-xl font-bold mb-4">Site Settings</h2>
+              
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Hero Profile Image (Drive Link)</label>
+                <div className="relative">
+                  <ImageIcon size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" />
+                  <input
+                    type="text"
+                    value={heroImage}
+                    onChange={(e) => setHeroImage(e.target.value)}
+                    className="w-full pl-12 pr-5 py-4 bg-primary-dark/50 border border-white/10 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-primary-light/50 text-sm"
+                    placeholder="Paste Google Drive link for your Hero Image"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">CV Download URL (Drive Link)</label>
+                <div className="relative">
+                  <LinkIcon size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" />
+                  <input
+                    type="text"
+                    value={cvLink}
+                    onChange={(e) => setCvLink(e.target.value)}
+                    className="w-full pl-12 pr-5 py-4 bg-primary-dark/50 border border-white/10 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-primary-light/50 text-sm"
+                    placeholder="Paste Google Drive link for your CV"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Successful Projects Count</label>
                 <input
@@ -1093,6 +1134,18 @@ const Admin = () => {
                     onChange={(e) => setSkillPercentage(Number(e.target.value))}
                     className="w-full accent-primary-light"
                   />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Icon (Drive Link - Optional)</label>
+                  <div className="relative">
+                    <ImageIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <input
+                      value={skillIcon}
+                      onChange={(e) => setSkillIcon(e.target.value)}
+                      className="w-full pl-12 pr-4 py-3 bg-primary-dark/50 border border-white/10 rounded-xl text-white focus:outline-none"
+                      placeholder="Paste Google Drive link for icon"
+                    />
+                  </div>
                 </div>
                 <div className="flex gap-3 mt-6">
                   <button type="button" onClick={() => setShowSkillModal(false)} className="flex-1 py-3 bg-white/5 rounded-xl text-sm">Cancel</button>

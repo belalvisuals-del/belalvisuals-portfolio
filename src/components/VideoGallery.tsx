@@ -4,28 +4,39 @@ import { Play, X } from 'lucide-react';
 import { PortfolioItem } from '../types';
 import { getYouTubeEmbedLink, getGoogleDriveDirectLink } from '../utils';
 
+import { Link } from 'react-router-dom';
+
 interface VideoGalleryProps {
   items: PortfolioItem[];
+  limit?: number;
 }
 
-const VideoGallery: React.FC<VideoGalleryProps> = ({ items }) => {
+const VideoGallery: React.FC<VideoGalleryProps> = ({ items, limit }) => {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
   const videoItems = items.filter(item => item.type === 'video');
 
+  const displayedVideos = React.useMemo(() => {
+    if (limit) {
+      const shuffled = [...videoItems].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, limit);
+    }
+    return videoItems;
+  }, [items, limit]);
+
   return (
     <section id="videos" className="py-24 bg-primary-navy">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center mb-16 flex flex-col items-center">
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">Motion & Video</h2>
-          <div className="w-20 h-1 bg-primary-light mx-auto mb-8"></div>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <div className="w-20 h-1 bg-primary-light mb-8"></div>
+          <p className="text-gray-400 max-w-2xl text-sm md:text-base px-4">
             High-impact promotional videos and smooth motion graphics that capture attention and drive engagement.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {videoItems.map((item) => (
+          {displayedVideos.map((item) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 20 }}
@@ -53,9 +64,21 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({ items }) => {
           ))}
         </div>
 
-        {videoItems.length === 0 && (
+        {displayedVideos.length === 0 && (
           <div className="text-center py-20">
             <p className="text-gray-500 italic">No videos found.</p>
+          </div>
+        )}
+
+        {limit && videoItems.length > limit && (
+          <div className="mt-16 text-center">
+            <Link 
+              to="/videos"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-primary-light hover:bg-white hover:text-primary-navy text-white font-bold rounded-full transition-all duration-300 shadow-lg shadow-primary-light/20 hover:scale-[1.02]"
+            >
+              See More Videos
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide-arrow-right"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </Link>
           </div>
         )}
       </div>

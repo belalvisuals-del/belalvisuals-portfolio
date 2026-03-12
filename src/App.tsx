@@ -18,6 +18,9 @@ import Footer from './components/Footer';
 import Admin from './components/Admin';
 import Article from './components/Article';
 import ArticleDetail from './components/ArticleDetail';
+import FloatingContact from './components/FloatingContact';
+import DesignsPage from './components/DesignsPage';
+import VideosPage from './components/VideosPage';
 import { Skill, ClientLogo, SiteSettings } from './types';
 
 function MissingConfig() {
@@ -47,8 +50,8 @@ function HomePage({ items, skills, clients, settings }: { items: PortfolioItem[]
       <Navbar />
       <Hero />
       <Experience skills={skills} settings={settings} />
-      <PortfolioGrid items={items} />
-      <VideoGallery items={items} />
+      <PortfolioGrid items={items} limit={12} />
+      <VideoGallery items={items} limit={9} />
       <Clients clients={clients} />
       <ContactForm />
       <Footer />
@@ -113,7 +116,10 @@ export default function App() {
         <Route path="/admin" element={<Admin />} />
         <Route path="/articles" element={<Article />} />
         <Route path="/articles/:id" element={<ArticleDetail />} />
+        <Route path="/designs" element={<DesignsPage items={items} />} />
+        <Route path="/videos" element={<VideosPage items={items} />} />
       </Routes>
+      <FloatingContact />
     </Router>
   );
 }

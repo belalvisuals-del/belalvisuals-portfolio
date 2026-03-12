@@ -32,19 +32,20 @@ const Article = () => {
       <Navbar />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        <header className="text-center mb-20">
+        <header className="text-center mb-16 flex flex-col items-center">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight"
+            className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight"
           >
             My <span className="text-primary-light">Articles</span>
           </motion.h1>
+          <div className="w-20 h-1 bg-primary-light mb-8"></div>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-gray-400 max-w-2xl mx-auto font-bengali text-lg"
+            className="text-gray-400 max-w-2xl mx-auto font-bengali text-sm md:text-lg px-4"
           >
             আমার ডিজাইন ভাবনা, টিপস এবং অভিজ্ঞতা শেয়ার করছি এখানে।
           </motion.p>

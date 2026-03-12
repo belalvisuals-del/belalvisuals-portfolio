@@ -26,12 +26,12 @@ const ContactForm = () => {
   const onSubmit = async (data: ContactFormData) => {
     try {
       if (!db) throw new Error('Database not configured');
-      
+
       await addDoc(collection(db, 'messages'), {
         ...data,
         createdAt: Date.now()
       });
-      
+
       setStatusMessage({ type: 'success', text: 'Message sent successfully!' });
       reset();
     } catch (error) {
@@ -41,7 +41,7 @@ const ContactForm = () => {
   };
 
   const contactInfo = [
-    { icon: <MapPin size={20} />, label: 'Location', value: 'Dhaka, Bangladesh', color: 'bg-primary-blue/10 text-primary-blue' },
+    { icon: <MapPin size={20} />, label: 'Location', value: 'Chattogram, Bangladesh', color: 'bg-primary-blue/10 text-primary-blue' },
     { icon: <Mail size={20} />, label: 'Email', value: 'belalvisuals@gmail.com', color: 'bg-primary-light/10 text-primary-light' },
     { icon: <Phone size={20} />, label: 'Phone', value: '+880 1628 786232', color: 'bg-primary-blue/10 text-primary-blue', href: 'tel:+8801628786232' },
     { icon: <MessageCircle size={20} />, label: 'WhatsApp', value: '+880 1628 786232', color: 'bg-green-500/10 text-green-500', href: 'https://wa.me/8801628786232' },
@@ -56,9 +56,8 @@ const ContactForm = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className={`fixed top-10 left-1/2 -translate-x-1/2 z-[100] px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border ${
-              statusMessage.type === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-500' : 'bg-red-500/10 border-red-500/20 text-red-500'
-            }`}
+            className={`fixed top-10 left-1/2 -translate-x-1/2 z-[100] px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border ${statusMessage.type === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-500' : 'bg-red-500/10 border-red-500/20 text-red-500'
+              }`}
           >
             <div className={`w-2 h-2 rounded-full ${statusMessage.type === 'success' ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
             <span className="font-bold text-sm">{statusMessage.text}</span>
@@ -74,13 +73,14 @@ const ContactForm = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
+            className="text-center lg:text-left flex flex-col items-center lg:items-start"
           >
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">Get In <span className="text-primary-light">Touch</span></h2>
-            <p className="text-gray-400 mb-10 text-sm md:text-lg leading-relaxed font-light">
+            <p className="text-gray-400 mb-10 text-sm md:text-lg leading-relaxed font-light px-4 lg:px-0">
               Have a project in mind? I'm always open to discussing new design projects, creative ideas, or opportunities to be part of your vision.
             </p>
 
-            <div className="space-y-6">
+            <div className="space-y-6 w-full max-w-sm">
               {contactInfo.map((info, idx) => (
                 <div key={idx} className="flex items-center gap-4 group">
                   <div className={`p-4 rounded-2xl transition-transform duration-300 group-hover:scale-110 ${info.color}`}>
@@ -107,10 +107,10 @@ const ContactForm = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="bg-primary-navy/50 backdrop-blur-md p-8 md:p-12 rounded-3xl border border-white/5 shadow-2xl"
+            className="bg-primary-navy/50 backdrop-blur-md p-6 md:p-12 rounded-3xl border border-white/5 shadow-2xl"
           >
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 md:space-y-6 text-left">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-2">Your Name</label>
                   <input
@@ -123,7 +123,7 @@ const ContactForm = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-2">Your Email</label>
                   <input
-                    {...register('email', { 
+                    {...register('email', {
                       required: 'Email is required',
                       pattern: { value: /^\S+@\S+$/i, message: 'Invalid email' }
                     })}

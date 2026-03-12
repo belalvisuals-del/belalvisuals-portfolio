@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Skill, SiteSettings } from '../types';
 import { Trophy, Zap, Award, CheckCircle } from 'lucide-react';
+import { getGoogleDriveDirectLink } from '../utils';
 
 interface ExperienceProps {
   skills: Skill[];
@@ -18,29 +19,30 @@ const Experience = ({ skills, settings }: ExperienceProps) => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
+            className="text-center lg:text-left"
           >
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">
               My <span className="text-primary-light">Experience</span> & Skills
             </h2>
-            <p className="text-gray-400 mb-10 text-sm md:text-lg leading-relaxed font-light">
+            <p className="text-gray-400 mb-10 text-sm md:text-lg leading-relaxed font-light text-center lg:text-left">
               I have spent years mastering the industry's leading creative tools. My expertise spans across graphic design, video editing, and visual storytelling.
             </p>
 
-            <div className="grid grid-cols-2 gap-6">
-              <div className="bg-primary-navy p-6 rounded-3xl border border-white/5 shadow-xl">
+            <div className="grid grid-cols-2 gap-4 md:gap-6">
+              <div className="bg-primary-navy p-4 md:p-6 rounded-3xl border border-white/5 shadow-xl flex flex-col items-center lg:items-start text-center lg:text-left">
                 <div className="w-12 h-12 bg-primary-blue/20 rounded-2xl flex items-center justify-center mb-4">
                   <Trophy className="text-primary-blue" size={24} />
                 </div>
-                <h3 className="text-3xl font-bold text-white mb-1">
+                <h3 className="text-2xl md:text-3xl font-bold text-white mb-1">
                   {settings?.successfulProjects || 0}+
                 </h3>
                 <p className="text-gray-500 text-[10px] uppercase tracking-widest font-bold">Successful Projects</p>
               </div>
-              <div className="bg-primary-navy p-6 rounded-3xl border border-white/5 shadow-xl">
+              <div className="bg-primary-navy p-4 md:p-6 rounded-3xl border border-white/5 shadow-xl flex flex-col items-center lg:items-start text-center lg:text-left">
                 <div className="w-12 h-12 bg-primary-light/20 rounded-2xl flex items-center justify-center mb-4">
                   <CheckCircle className="text-primary-light" size={24} />
                 </div>
-                <h3 className="text-3xl font-bold text-white mb-1">100%</h3>
+                <h3 className="text-2xl md:text-3xl font-bold text-white mb-1">100%</h3>
                 <p className="text-gray-500 text-[10px] uppercase tracking-widest font-bold">Client Satisfaction</p>
               </div>
             </div>
@@ -57,7 +59,11 @@ const Experience = ({ skills, settings }: ExperienceProps) => {
               <div key={skill.id} className="space-y-2">
                 <div className="flex justify-between items-end">
                   <span className="text-white font-bold text-sm uppercase tracking-widest flex items-center gap-2">
-                    <Zap size={14} className="text-primary-light" />
+                    {skill.icon ? (
+                      <img src={getGoogleDriveDirectLink(skill.icon)} alt={skill.name} className="w-4 h-4 object-contain" referrerPolicy="no-referrer" />
+                    ) : (
+                      <Zap size={14} className="text-primary-light" />
+                    )}
                     {skill.name}
                   </span>
                   <span className="text-primary-light font-mono text-xs">{skill.percentage}%</span>
